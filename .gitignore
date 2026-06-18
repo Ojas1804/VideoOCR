@@ -1,2 +1,11 @@
-/PLAN.md
-/README.md
+PLAN.md
+./test
+.vscode
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.log
+*.avi
