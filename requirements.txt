@@ -1,0 +1,38 @@
+# Core
+numpy>=1.26.0
+opencv-python>=4.10.0
+
+# OCR
+paddlepaddle>=3.0.0
+paddleocr>=2.10.0
+
+# Deep Learning
+torch>=2.7.0
+torchvision>=0.22.0
+
+# Translation
+transformers>=4.53.0
+sentencepiece>=0.2.0
+sacremoses>=0.1.1
+accelerate>=1.8.0
+
+# Tracking
+norfair>=2.2.0
+
+# Image/Text Rendering
+Pillow>=11.0.0
+
+# Data Handling
+pandas>=2.3.0
+
+# Progress Bars
+tqdm>=4.67.0
+
+# JSON Validation (optional)
+pydantic>=2.11.0
+
+# Utilities
+scipy>=1.16.0
+
+# Video Processing
+ffmpeg-python>=0.2.0
