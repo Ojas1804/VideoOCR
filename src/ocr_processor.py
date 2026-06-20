@@ -1,13 +1,7 @@
-"""
-Step 3: OCR – Recognise text inside detected bounding boxes.
-Runs PaddleOCR's recogniser on each cropped region and returns the text.
-"""
-
 import numpy as np
 from paddleocr import PaddleOCR
 
-
-# Singleton OCR engine – recognition only (det=False).
+# Singleton OCR engine - recognition only (det=False).
 _recogniser: PaddleOCR | None = None
 
 
@@ -35,76 +29,35 @@ def _crop_region(frame_bgr: np.ndarray, bbox: list[int]) -> np.ndarray:
     return frame_bgr[y1:y2, x1:x2]
 
 
-def run_ocr_on_region(
-    frame_bgr: np.ndarray,
-    frame_number: int,
-    bbox: list[int],
-    confidence_threshold: float = 0.6,
-) -> dict | None:
-    """
-    Run OCR on a single bounding-box region within a frame.
-
-    Args:
-        frame_bgr:            Full BGR frame from OpenCV.
-        frame_number:         Original frame index in the video.
-        bbox:                 [x, y, width, height] of the region.
-        confidence_threshold: Minimum recognition confidence to accept the result.
-
-    Returns:
-        Dict with recognised text, or None if confidence is too low / no text found:
-        {
-            "frame": <int>,
-            "text":  "<recognised string>",
-            "bbox":  [x, y, w, h]
-        }
-    """
+def run_ocr_on_region(frame_bgr: np.ndarray,frame_number: int,
+    bbox: list[int],confidence_threshold: float = 0.6) -> dict | None:
     crop = _crop_region(frame_bgr, bbox)
     if crop.size == 0:
         return None
-
     recogniser = _get_recogniser()
     result = recogniser.ocr(crop, cls=False)
-
     if not result or result[0] is None:
         return None
-
     # Collect all text lines in the crop, pick the one with highest confidence
     best_text = ""
     best_conf = 0.0
-
     for line in result[0]:
         # Recognition output: [bbox_within_crop, (text, confidence)]
         _, (text, conf) = line
         if conf > best_conf:
             best_conf = conf
             best_text = text
-
     if best_conf < confidence_threshold or not best_text.strip():
         return None
-
     return {
         "frame": frame_number,
         "text": best_text.strip(),
         "bbox": bbox,
     }
 
-
-def run_ocr_on_detections(
-    frame_bgr: np.ndarray,
+def run_ocr_on_detections(frame_bgr: np.ndarray,
     detections: list[dict],
-    confidence_threshold: float = 0.6,
-) -> list[dict]:
-    """
-    Run OCR on every detected region in a frame.
-
-    Args:
-        frame_bgr:   Full BGR frame.
-        detections:  List of detection dicts (output of text_detector.detect_text_regions).
-        confidence_threshold: Passed to run_ocr_on_region.
-
-    Returns:
-        List of OCR result dicts (None entries are filtered out).
-    """
+    confidence_threshold: float = 0.6) -> list[dict]:
     results = []
     for det in detections:
         ocr_result = run_ocr_on_region(
