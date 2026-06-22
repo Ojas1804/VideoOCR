@@ -1,38 +1,44 @@
 # Core
-numpy>=1.26.0
-opencv-python>=4.10.0
+numpy
+opencv-python
 
 # OCR
-paddlepaddle>=3.0.0
-paddleocr>=2.10.0
+paddlepaddle
+paddleocr
 
 # Deep Learning
-torch>=2.7.0
-torchvision>=0.22.0
+torch
+torchvision
 
 # Translation
-transformers>=4.53.0
-sentencepiece>=0.2.0
-sacremoses>=0.1.1
-accelerate>=1.8.0
+transformers
+sentencepiece
+sacremoses
+accelerate
 
 # Tracking
-norfair>=2.2.0
+norfair
 
 # Image/Text Rendering
-Pillow>=11.0.0
+Pillow
 
 # Data Handling
-pandas>=2.3.0
+pandas
 
 # Progress Bars
-tqdm>=4.67.0
+tqdm
+
+# Web Server
+flask
 
 # JSON Validation (optional)
-pydantic>=2.11.0
+pydantic
 
 # Utilities
-scipy>=1.16.0
+scipy
 
 # Video Processing
-ffmpeg-python>=0.2.0
+ffmpeg-python
+
+# webapp
+flask

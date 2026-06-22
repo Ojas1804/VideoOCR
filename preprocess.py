@@ -52,7 +52,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 def _extract_frames_and_ocr(video_path: str,sample_fps: float,det_conf: float,
-    ocr_conf: float,ocr_output: str,) -> list[dict]:
+    ocr_conf: float,ocr_output: str) -> list[dict]:
     video_path = str(Path(video_path).resolve())
     info = get_video_info(video_path)
     print(
@@ -89,8 +89,11 @@ def _extract_frames_and_ocr(video_path: str,sample_fps: float,det_conf: float,
     return all_ocr
 
 def _track_and_group_detections(
-    ocr_results: list[dict],distance_threshold: float,
-    min_detections: int) -> list[dict]:
+    ocr_results: list[dict], distance_threshold: float,
+    min_detections: int, on_progress=None) -> list[dict]:
+    if on_progress:
+        on_progress({"type": "step", "step_num": 2, "total_steps": 4,
+                     "name": "Tracking & grouping text regions"})
     print("\n[Tracking] Associating detections across frames and grouping …")
     tracks = track_and_group(
         ocr_results,
@@ -100,44 +103,57 @@ def _track_and_group_detections(
     print(f"[Tracking] {len(tracks)} stable track(s) found.")
     return tracks
 
-def _translate_track_texts(tracks: list[dict]) -> list[dict]:
-    print("\n[Translation] Translating unique Japanese strings …")
+def _translate_track_texts(tracks: list[dict], on_progress=None) -> list[dict]:
+    print("\n[Translation] Translating unique Japanese strings \u2026")
     unique_texts = list({t["text"] for t in tracks})
-    translations = translate_texts(unique_texts)
+    if on_progress:
+        on_progress({"type": "step", "step_num": 3, "total_steps": 4,
+                     "name": "Translating", "total": len(unique_texts)})
+    done = [0]
+
+    def _on_item(src: str, tgt: str) -> None:
+        done[0] += 1
+        if on_progress:
+            on_progress({"type": "translation", "current": done[0],
+                         "total": len(unique_texts),
+                         "japanese": src, "english": tgt})
+
+    translations = translate_texts(unique_texts, on_item=_on_item)
     for track in tracks:
         track["translation"] = translations.get(track["text"], "")
     print(f"[Translation] {len(translations)} unique string(s) translated.")
     return tracks
 
-def _build_display_metadata(tracks: list[dict]) -> list[dict]:
+def _build_display_metadata(tracks: list[dict], on_progress=None) -> list[dict]:
+    if on_progress:
+        on_progress({"type": "step", "step_num": 4, "total_steps": 4,
+                     "name": "Building translation metadata"})
     metadata: list[dict] = []
     for i, track in enumerate(tracks, start=1):
-        x, y, w, h = track["bbox"]
-        display_x = x
-        display_y = y + h + _DISPLAY_PADDING_PX
+        positions = []
+        for kf in track["keyframes"]:
+            x, y, w, h = kf["bbox"]
+            positions.append({
+                "t": kf["t"],
+                "x": x,
+                "y": y + h + _DISPLAY_PADDING_PX,
+            })
         metadata.append({
             "id":         i,
             "japanese":   track["text"],
             "english":    track["translation"],
-            "start_time": track["start_time"],   # seconds
-            "end_time":   track["end_time"],     # seconds
-            "x":          display_x,
-            "y":          display_y,
-            "source_bbox": {
-                "x":      x,
-                "y":      y,
-                "width":  w,
-                "height": h,
-            },
+            "start_time": track["start_time"],
+            "end_time":   track["end_time"],
+            "positions":  positions,
         })
     return metadata
 
 def run_pipeline(
-    video_path: str,sample_fps: float = 2.0,det_conf: float = 0.5,
-    ocr_conf: float = 0.6,distance_threshold: float = 60.0,
-    min_detections: int = 2,ocr_output: str = "ocr_raw.json",
+    video_path: str, sample_fps: float = 2.0, det_conf: float = 0.5,
+    ocr_conf: float = 0.6, distance_threshold: float = 60.0,
+    min_detections: int = 2, ocr_output: str = "ocr_raw.json",
     output_path: str = "translation_metadata.json",
-    skip_ocr: bool = False,) -> list[dict]:
+    skip_ocr: bool = False, on_progress=None) -> list[dict]:
     if skip_ocr:
         ocr_path = str(Path(ocr_output).resolve())
         print(f"[OCR] --skip-ocr: loading from {ocr_path}")
@@ -150,12 +166,14 @@ def run_pipeline(
     if not ocr_results:
         print("No OCR results - nothing to process.")
         return []
-    tracks = _track_and_group_detections(ocr_results, distance_threshold, min_detections)
+    tracks = _track_and_group_detections(
+        ocr_results, distance_threshold, min_detections, on_progress=on_progress
+    )
     if not tracks:
         print("No stable tracks found - nothing to translate.")
         return []
-    tracks = _translate_track_texts(tracks)
-    metadata = _build_display_metadata(tracks)
+    tracks = _translate_track_texts(tracks, on_progress=on_progress)
+    metadata = _build_display_metadata(tracks, on_progress=on_progress)
     output_path = str(Path(output_path).resolve())
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, ensure_ascii=False, indent=2)

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VideoOCR Player</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app">
+
+    <header class="app-header">
+      <h1>VideoOCR</h1>
+      <p class="subtitle">Japanese text overlay — powered by precomputed translations</p>
+    </header>
+
+    <!-- ── Tabs ──────────────────────────────────────────────────────── -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="preprocess">&#9881; Preprocess</button>
+      <button class="tab-btn"        data-tab="player">&#9654; Player</button>
+    </div>
+
+    <!-- ── PREPROCESS TAB ────────────────────────────────────────────── -->
+    <div class="tab-pane" id="tab-preprocess">
+
+      <!-- Upload area -->
+      <div class="upload-area" id="upload-area">
+        <div class="upload-icon">&#127909;</div>
+        <div class="upload-hint">
+          Drag &amp; drop a video here, or <span class="link">click to browse</span>
+        </div>
+        <div class="pp-filename" id="pp-filename"></div>
+        <input type="file" id="pp-video-input" accept="video/*" />
+      </div>
+
+      <!-- Settings (collapsed by default) -->
+      <details class="settings-panel">
+        <summary>&#9881; Settings</summary>
+        <div class="settings-grid">
+          <div class="setting-row">
+            <label for="pp-sample-fps">Sample FPS</label>
+            <input type="number" id="pp-sample-fps" value="2" min="0.5" max="10" step="0.5" />
+            <span class="setting-hint">Lower = faster &nbsp;·&nbsp; Higher = more accurate timing</span>
+          </div>
+          <div class="setting-row">
+            <label for="pp-det-conf">Detection confidence</label>
+            <input type="number" id="pp-det-conf" value="0.5" min="0" max="1" step="0.05" />
+            <span class="setting-hint">Minimum score to accept a text region</span>
+          </div>
+          <div class="setting-row">
+            <label for="pp-ocr-conf">OCR confidence</label>
+            <input type="number" id="pp-ocr-conf" value="0.6" min="0" max="1" step="0.05" />
+            <span class="setting-hint">Minimum score to accept a recognised string</span>
+          </div>
+        </div>
+      </details>
+
+      <button class="start-btn" id="start-btn" disabled>Start Preprocessing</button>
+
+      <!-- Progress section (hidden until a job starts) -->
+      <div class="progress-section hidden" id="progress-section">
+
+        <!-- Step tracker -->
+        <div class="step-tracker">
+          <div class="step-node pending" id="step-node-1"><span class="step-num">1</span><span class="step-label">Extract &amp; OCR</span></div>
+          <div class="step-conn"></div>
+          <div class="step-node pending" id="step-node-2"><span class="step-num">2</span><span class="step-label">Track</span></div>
+          <div class="step-conn"></div>
+          <div class="step-node pending" id="step-node-3"><span class="step-num">3</span><span class="step-label">Translate</span></div>
+          <div class="step-conn"></div>
+          <div class="step-node pending" id="step-node-4"><span class="step-num">4</span><span class="step-label">Metadata</span></div>
+        </div>
+
+        <!-- Frame / batch progress bar (shown during OCR and Translation) -->
+        <div class="pp-progress-bar-wrap hidden" id="pp-progress-bar-wrap">
+          <div class="pp-progress-bar-track">
+            <div class="pp-progress-bar-fill" id="pp-progress-bar-fill"></div>
+          </div>
+          <span class="pp-progress-text" id="pp-progress-text"></span>
+        </div>
+
+        <!-- Live translation log -->
+        <div class="pp-log" id="pp-log"></div>
+
+        <!-- Completion / error messages -->
+        <div class="pp-done hidden" id="pp-done">&#10003; Preprocessing complete — switching to player&hellip;</div>
+        <div class="pp-error hidden" id="pp-error"></div>
+
+      </div>
+    </div><!-- /tab-preprocess -->
+
+    <!-- ── PLAYER TAB ─────────────────────────────────────────────────── -->
+    <div class="tab-pane hidden" id="tab-player">
+
+      <!-- File loading controls -->
+      <div class="load-bar">
+        <div class="load-item">
+          <label class="file-btn" for="video-input">&#127909; Load Video</label>
+          <input type="file" id="video-input" accept="video/*" />
+          <span class="filename" id="video-filename">No video loaded</span>
+        </div>
+        <div class="load-item">
+          <label class="file-btn" for="meta-input">&#128196; Load Metadata</label>
+          <input type="file" id="meta-input" accept=".json" />
+          <span class="filename" id="meta-filename">No metadata loaded</span>
+        </div>
+      </div>
+
+      <!-- Video + canvas overlay -->
+      <div class="player-wrapper" id="player-wrapper">
+        <div class="placeholder" id="placeholder">
+          <span>Load a video and its <code>translation_metadata.json</code> to begin.</span>
+        </div>
+        <video id="video" controls></video>
+        <canvas id="overlay"></canvas>
+      </div>
+
+      <!-- Status bar -->
+      <div class="status-bar">
+        <span id="status-time">0.00 s</span>
+        <span id="status-active"></span>
+        <span class="hint">Space&nbsp;— play/pause &nbsp;·&nbsp; ← → — seek 5 s</span>
+      </div>
+
+    </div><!-- /tab-player -->
+
+  </div><!-- /app -->
+
+  <script src="player.js"></script>
+</body>
+</html>
+

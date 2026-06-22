@@ -24,7 +24,17 @@ def _load_model() -> None:
     device_label = f"GPU ({torch.cuda.get_device_name(0)})" if _device.type == "cuda" else "CPU"
     print(f"[translator] Model ready on {device_label}.")
 
-def translate_texts(texts: list[str], batch_size: int = 16) -> dict[str, str]:
+def translate_texts(texts: list[str], batch_size: int = 16, on_item=None) -> dict[str, str]:
+    """
+    Translate a list of Japanese strings to English.
+
+    Args:
+        texts:      Source strings (duplicates are collapsed).
+        batch_size: Inference batch size.
+        on_item:    Optional callback(src: str, tgt: str) called after each
+                    string is translated — used by the web server to stream
+                    per-translation progress events.
+    """
     _load_model()
     unique_texts = list(dict.fromkeys(t for t in texts if t.strip()))
     if not unique_texts:
@@ -45,4 +55,6 @@ def translate_texts(texts: list[str], batch_size: int = 16) -> dict[str, str]:
         decoded = _tokenizer.batch_decode(translated_ids, skip_special_tokens=True)
         for src, tgt in zip(batch, decoded):
             translations[src] = tgt
+            if on_item:
+                on_item(src, tgt)
     return translations

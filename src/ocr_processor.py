@@ -4,7 +4,6 @@ from paddleocr import PaddleOCR
 # Singleton OCR engine - recognition only (det=False).
 _recogniser: PaddleOCR | None = None
 
-
 def _get_recogniser() -> PaddleOCR:
     global _recogniser
     if _recogniser is None:

@@ -82,7 +82,7 @@ python preprocess.py anime.mp4 --skip-ocr --ocr-output ocr_raw.json
 
 ## Output format
 
-`translation_metadata.json` is an array of entries, one per detected text region:
+`translation_metadata.json` is an array of entries, one per stable text segment:
 
 ```json
 [
@@ -92,9 +92,11 @@ python preprocess.py anime.mp4 --skip-ocr --ocr-output ocr_raw.json
     "english": "Ramen Shop",
     "start_time": 4.17,
     "end_time": 8.33,
-    "x": 500,
-    "y": 345,
-    "source_bbox": { "x": 500, "y": 300, "width": 120, "height": 35 }
+    "positions": [
+      { "t": 4.17, "x": 500, "y": 345 },
+      { "t": 6.25, "x": 560, "y": 345 },
+      { "t": 8.33, "x": 650, "y": 345 }
+    ]
   }
 ]
 ```
@@ -104,8 +106,50 @@ python preprocess.py anime.mp4 --skip-ocr --ocr-output ocr_raw.json
 | `japanese` | Original text detected on screen |
 | `english` | Translated text |
 | `start_time` / `end_time` | Seconds when the text is visible |
-| `x`, `y` | Pixel coordinates to render the translation (bottom-left origin) |
-| `source_bbox` | Bounding box of the original Japanese text |
+| `positions` | Per-frame display coordinates (pixels). The playback layer interpolates between these to follow a panning or zooming camera. `x`, `y` is where to render the translation — 10 px below the bottom of the source bounding box. |
+
+Dynamic text (e.g. a scoreboard changing from "100" to "110") produces separate entries, one per stable value.
+
+---
+
+## Playback
+
+Open `player/index.html` directly in any modern browser — no server needed.
+
+```
+player/index.html
+```
+
+### Steps
+
+1. Click **Load Video** and pick your video file.
+2. Click **Load Metadata** and pick the `translation_metadata.json` produced by `preprocess.py`.
+3. Press play. Translations appear below each Japanese text region, following the camera if it pans.
+
+### Keyboard shortcuts
+
+| Key | Action |
+|---|---|
+| `Space` | Play / pause |
+| `→` | Seek forward 5 s |
+| `←` | Seek backward 5 s |
+
+### How the overlay works
+
+```
+video.currentTime = 5.0 s
+        │
+        ▼
+filter metadata where start_time ≤ 5.0 ≤ end_time
+        │
+        ├── for each active entry
+        │     interpolate (x, y) from its keyframes   ← handles moving camera
+        │     draw label on <canvas> overlay
+        ▼
+requestAnimationFrame → repeat
+```
+
+The canvas is kept pixel-perfect to the video element via a `ResizeObserver`, so overlays scale correctly when the window is resized or the browser zooms.
 
 ---
 
@@ -118,6 +162,10 @@ src/
   frame_extractor.py   # Sample frames from a video at a given FPS
   text_detector.py     # Detect text regions with PaddleOCR
   ocr_processor.py     # Recognise text inside detected regions
-  tracker.py           # Track regions across frames and collapse into segments
+  tracker.py           # Track regions across frames; split on text change
   translator.py        # Translate Japanese strings with MarianMT
+player/
+  index.html           # Browser player UI
+  player.js            # Playback logic: metadata lookup, interpolation, drawing
+  style.css            # Dark-theme styles
 ```
