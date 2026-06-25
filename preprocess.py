@@ -5,8 +5,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 from src.frame_extractor import extract_frames, get_video_info
-from src.text_detector import detect_text_regions
-from src.ocr_processor import run_ocr_on_detections
+from src.text_detector import detect_and_read_text
 from src.tracker import track_and_group
 from src.translator import translate_texts
 
@@ -69,15 +68,8 @@ def _extract_frames_and_ocr(video_path: str,sample_fps: float,det_conf: float,
         frame_iter, total=estimated_samples,
         desc="Extracting frames and running OCR", unit="frame",
     ):
-        # Step 2
-        detections = detect_text_regions(
-            frame_bgr, frame_number, confidence_threshold=det_conf
-        )
-        if not detections:
-            continue
-        # Step 3
-        ocr_results = run_ocr_on_detections(
-            frame_bgr, detections, confidence_threshold=ocr_conf
+        ocr_results = detect_and_read_text(
+            frame_bgr, frame_number, det_conf=det_conf, ocr_conf=ocr_conf
         )
         for r in ocr_results:
             r["timestamp"] = round(timestamp, 4)

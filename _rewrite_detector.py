@@ -1,3 +1,4 @@
+content = '''\
 import numpy as np
 from paddleocr import PaddleOCR
 
@@ -60,3 +61,9 @@ def detect_and_read_text(
                 "ocr_conf":  float(r_score),
             })
     return detections
+'''
+
+with open("src/text_detector.py", "w", encoding="utf-8", newline="\n") as f:
+    f.write(content)
+
+print("src/text_detector.py rewritten successfully.")
