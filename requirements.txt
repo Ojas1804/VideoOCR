@@ -5,6 +5,7 @@ opencv-python
 # OCR
 paddlepaddle
 paddleocr
+manga-ocr
 
 # Deep Learning
 torch

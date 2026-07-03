@@ -2,6 +2,7 @@ import argparse
 import json
 from pathlib import Path
 
+import cv2
 from tqdm import tqdm
 
 from src.frame_extractor import extract_frames, get_video_info
@@ -48,10 +49,19 @@ def parse_args() -> argparse.Namespace:
         "--skip-ocr", action="store_true",
         help="Skip Steps 1-3 and load OCR results from --ocr-output instead.",
     )
+    parser.add_argument(
+        "--save-frames", action="store_true",
+        help="Save sampled frames as images while processing.",
+    )
+    parser.add_argument(
+        "--frames-dir", default="test/original",
+        help="Directory where sampled frame images are saved (default: test/original).",
+    )
     return parser.parse_args()
 
 def _extract_frames_and_ocr(video_path: str,sample_fps: float,det_conf: float,
-    ocr_conf: float,ocr_output: str) -> list[dict]:
+    ocr_conf: float,ocr_output: str,save_frames: bool = False,
+    frames_dir: str = "test/original") -> list[dict]:
     video_path = str(Path(video_path).resolve())
     info = get_video_info(video_path)
     print(
@@ -63,11 +73,19 @@ def _extract_frames_and_ocr(video_path: str,sample_fps: float,det_conf: float,
     )
     estimated_samples = int(info["duration_seconds"] * sample_fps)
     all_ocr: list[dict] = []
+    frames_path = Path(frames_dir).resolve()
+    if save_frames:
+        frames_path.mkdir(parents=True, exist_ok=True)
+        print(f"[Frames] Saving sampled frames to {frames_path}")
     frame_iter = extract_frames(video_path, sample_fps=sample_fps)
     for frame_number, timestamp, frame_bgr in tqdm(
         frame_iter, total=estimated_samples,
         desc="Extracting frames and running OCR", unit="frame",
     ):
+        if save_frames:
+            frame_name = f"frame_{frame_number:06d}_{timestamp:.3f}s.jpg"
+            cv2.imwrite(str(frames_path / frame_name), frame_bgr)
+
         ocr_results = detect_and_read_text(
             frame_bgr, frame_number, det_conf=det_conf, ocr_conf=ocr_conf
         )
@@ -145,7 +163,8 @@ def run_pipeline(
     ocr_conf: float = 0.6, distance_threshold: float = 60.0,
     min_detections: int = 2, ocr_output: str = "ocr_raw.json",
     output_path: str = "translation_metadata.json",
-    skip_ocr: bool = False, on_progress=None) -> list[dict]:
+    skip_ocr: bool = False, save_frames: bool = False,
+    frames_dir: str = "test/original", on_progress=None) -> list[dict]:
     if skip_ocr:
         ocr_path = str(Path(ocr_output).resolve())
         print(f"[OCR] --skip-ocr: loading from {ocr_path}")
@@ -153,7 +172,8 @@ def run_pipeline(
             ocr_results: list[dict] = json.load(f)
     else:
         ocr_results = _extract_frames_and_ocr(
-            video_path, sample_fps, det_conf, ocr_conf, ocr_output
+            video_path, sample_fps, det_conf, ocr_conf, ocr_output,
+            save_frames=save_frames, frames_dir=frames_dir,
         )
     if not ocr_results:
         print("No OCR results - nothing to process.")
@@ -184,4 +204,6 @@ if __name__ == "__main__":
         ocr_output=args.ocr_output,
         output_path=args.output,
         skip_ocr=args.skip_ocr,
+        save_frames=args.save_frames,
+        frames_dir=args.frames_dir,
     )
