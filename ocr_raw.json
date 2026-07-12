@@ -1,1 +1,374 @@
-[]
+[
+  {
+    "frame": 2,
+    "timestamp": 0.5,
+    "text": "AM。/dee",
+    "bbox": [
+      101,
+      256,
+      517,
+      104
+    ],
+    "confidence": 0.463
+  },
+  {
+    "frame": 3,
+    "timestamp": 1,
+    "text": "タン人",
+    "bbox": [
+      224,
+      0,
+      247,
+      144
+    ],
+    "confidence": 0.437
+  },
+  {
+    "frame": 4,
+    "timestamp": 1.5,
+    "text": "い、ア",
+    "bbox": [
+      199,
+      0,
+      285,
+      146
+    ],
+    "confidence": 0.63
+  },
+  {
+    "frame": 8,
+    "timestamp": 3.5,
+    "text": "。/kN",
+    "bbox": [
+      216,
+      0,
+      164,
+      41
+    ],
+    "confidence": 0.594
+  },
+  {
+    "frame": 8,
+    "timestamp": 3.5,
+    "text": "、リ",
+    "bbox": [
+      210,
+      82,
+      254,
+      61
+    ],
+    "confidence": 0.614
+  },
+  {
+    "frame": 9,
+    "timestamp": 4,
+    "text": "2いい",
+    "bbox": [
+      218,
+      1,
+      244,
+      20
+    ],
+    "confidence": 0.606
+  },
+  {
+    "frame": 9,
+    "timestamp": 4,
+    "text": "|、1",
+    "bbox": [
+      203,
+      76,
+      283,
+      21
+    ],
+    "confidence": 0.409
+  },
+  {
+    "frame": 9,
+    "timestamp": 4,
+    "text": "、リ",
+    "bbox": [
+      210,
+      101,
+      254,
+      61
+    ],
+    "confidence": 0.521
+  },
+  {
+    "frame": 11,
+    "timestamp": 5,
+    "text": "ーー|。",
+    "bbox": [
+      197,
+      254,
+      156,
+      54
+    ],
+    "confidence": 0.511
+  },
+  {
+    "frame": 13,
+    "timestamp": 6,
+    "text": "プペ",
+    "bbox": [
+      0,
+      217,
+      207,
+      43
+    ],
+    "confidence": 0.491
+  },
+  {
+    "frame": 14,
+    "timestamp": 6.5,
+    "text": "ンジいぶ",
+    "bbox": [
+      82,
+      209,
+      120,
+      51
+    ],
+    "confidence": 0.358
+  },
+  {
+    "frame": 15,
+    "timestamp": 7,
+    "text": "つい、(al",
+    "bbox": [
+      46,
+      168,
+      317,
+      61
+    ],
+    "confidence": 0.385
+  },
+  {
+    "frame": 15,
+    "timestamp": 7,
+    "text": "の",
+    "bbox": [
+      91,
+      208,
+      105,
+      45
+    ],
+    "confidence": 0.615
+  },
+  {
+    "frame": 16,
+    "timestamp": 7.5,
+    "text": "ーー",
+    "bbox": [
+      207,
+      0,
+      37,
+      15
+    ],
+    "confidence": 0.456
+  },
+  {
+    "frame": 16,
+    "timestamp": 7.5,
+    "text": "<っ",
+    "bbox": [
+      264,
+      112,
+      50,
+      19
+    ],
+    "confidence": 0.64
+  },
+  {
+    "frame": 16,
+    "timestamp": 7.5,
+    "text": "スリ",
+    "bbox": [
+      51,
+      121,
+      421,
+      101
+    ],
+    "confidence": 0.427
+  },
+  {
+    "frame": 16,
+    "timestamp": 7.5,
+    "text": "人るゃ\"ーー",
+    "bbox": [
+      98,
+      186,
+      254,
+      37
+    ],
+    "confidence": 0.455
+  },
+  {
+    "frame": 17,
+    "timestamp": 8,
+    "text": "ーー",
+    "bbox": [
+      207,
+      0,
+      37,
+      15
+    ],
+    "confidence": 0.435
+  },
+  {
+    "frame": 17,
+    "timestamp": 8,
+    "text": "し<ココ、てこち)",
+    "bbox": [
+      98,
+      107,
+      374,
+      71
+    ],
+    "confidence": 0.354
+  },
+  {
+    "frame": 17,
+    "timestamp": 8,
+    "text": "るパ",
+    "bbox": [
+      121,
+      228,
+      47,
+      31
+    ],
+    "confidence": 0.743
+  },
+  {
+    "frame": 17,
+    "timestamp": 8,
+    "text": "みっやゃゅい",
+    "bbox": [
+      80,
+      270,
+      101,
+      29
+    ],
+    "confidence": 0.602
+  },
+  {
+    "frame": 18,
+    "timestamp": 8.5,
+    "text": "ーー",
+    "bbox": [
+      207,
+      0,
+      37,
+      15
+    ],
+    "confidence": 0.454
+  },
+  {
+    "frame": 18,
+    "timestamp": 8.5,
+    "text": "いダービー)",
+    "bbox": [
+      94,
+      107,
+      378,
+      71
+    ],
+    "confidence": 0.477
+  },
+  {
+    "frame": 18,
+    "timestamp": 8.5,
+    "text": "ンプいい",
+    "bbox": [
+      62,
+      175,
+      122,
+      49
+    ],
+    "confidence": 0.372
+  },
+  {
+    "frame": 18,
+    "timestamp": 8.5,
+    "text": "みっやゃゅい",
+    "bbox": [
+      80,
+      270,
+      101,
+      29
+    ],
+    "confidence": 0.706
+  },
+  {
+    "frame": 19,
+    "timestamp": 9,
+    "text": "1ダー)ピラ",
+    "bbox": [
+      90,
+      107,
+      339,
+      31
+    ],
+    "confidence": 0.624
+  },
+  {
+    "frame": 19,
+    "timestamp": 9,
+    "text": "2リ",
+    "bbox": [
+      61,
+      121,
+      411,
+      71
+    ],
+    "confidence": 0.518
+  },
+  {
+    "frame": 19,
+    "timestamp": 9,
+    "text": "みっやゅい",
+    "bbox": [
+      80,
+      280,
+      101,
+      9
+    ],
+    "confidence": 0.758
+  },
+  {
+    "frame": 20,
+    "timestamp": 9.5,
+    "text": "ーー",
+    "bbox": [
+      207,
+      0,
+      37,
+      15
+    ],
+    "confidence": 0.433
+  },
+  {
+    "frame": 20,
+    "timestamp": 9.5,
+    "text": "うぅぶ)",
+    "bbox": [
+      69,
+      121,
+      403,
+      57
+    ],
+    "confidence": 0.466
+  },
+  {
+    "frame": 20,
+    "timestamp": 9.5,
+    "text": "し人電思",
+    "bbox": [
+      73,
+      210,
+      169,
+      46
+    ],
+    "confidence": 0.302
+  }
+]

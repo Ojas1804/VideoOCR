@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "japanese": "、リ",
+    "english": "arranged in a ring shape can provide advantages over a single disc magnet having the same diameter as the ring shape, but it has been found that a continuous ring provides the most efficient design (for a given surface area).",
+    "start_time": 3.5,
+    "end_time": 4,
+    "positions": [
+      {
+        "t": 3.5,
+        "x": 210,
+        "y": 153
+      },
+      {
+        "t": 4,
+        "x": 210,
+        "y": 172
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "japanese": "ーー",
+    "english": "ーー",
+    "start_time": 7.5,
+    "end_time": 9.5,
+    "positions": [
+      {
+        "t": 7.5,
+        "x": 207,
+        "y": 25
+      },
+      {
+        "t": 8,
+        "x": 207,
+        "y": 25
+      },
+      {
+        "t": 8.5,
+        "x": 207,
+        "y": 25
+      },
+      {
+        "t": 9.5,
+        "x": 207,
+        "y": 25
+      }
+    ]
+  }
+]
