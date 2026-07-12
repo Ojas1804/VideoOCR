@@ -2,6 +2,8 @@
 
 Automatically detect Japanese text in a video, translate it to English, and produce a metadata file that tells a playback app exactly **when**, **where**, and **what** to display — similar to subtitles, but with on-screen coordinates so translations appear right below the original text.
 
+**Stack:** Node.js · Tesseract.js · fluent-ffmpeg · Express
+
 ---
 
 ## How it works
@@ -9,12 +11,11 @@ Automatically detect Japanese text in a video, translate it to English, and prod
 ```
 Video
  │
- ├─ Extract sampled frames        (2 fps by default)
- ├─ Detect Japanese text regions  (PaddleOCR detector)
- ├─ Read the text in each region  (PaddleOCR recogniser)
- ├─ Track regions across frames   (Norfair)
+ ├─ Extract sampled frames        (ffmpeg via fluent-ffmpeg)
+ ├─ Detect & read Japanese text   (Tesseract.js — jpn language)
+ ├─ Track regions across frames   (centroid tracker)
  ├─ Collapse tracks into segments (dominant text, time range)
- ├─ Translate unique strings once (MarianMT  ja→en)
+ ├─ Translate unique strings once (MyMemory API — ja → en)
  └─ Compute display coordinates   (below source bounding box)
           │
           ▼
@@ -25,25 +26,25 @@ Video
 
 ## Requirements
 
-- Python 3.11+
-- A CUDA-capable GPU is recommended for translation (CPU works too, but is slower)
+- **Node.js 18+**
+- ffmpeg is **bundled automatically** via `@ffmpeg-installer/ffmpeg` — no separate install needed.
 
 Install all dependencies:
 
 ```bash
-pip install -r requirements.txt
+npm install
 ```
 
-> **PaddlePaddle note:** the `requirements.txt` installs the CPU build by default. For a CUDA build visit the [PaddlePaddle install page](https://www.paddlepaddle.org.cn/en/install/quick).
+> **Tesseract language data** is downloaded automatically on first run and cached in `tessdata/`.
 
 ---
 
 ## Usage
 
-### Preprocess a video (full pipeline)
+### Preprocess a video (CLI)
 
 ```bash
-python preprocess.py path/to/video.mp4
+node preprocess.js path/to/video.mp4
 ```
 
 This runs all steps and writes two files:
@@ -57,32 +58,41 @@ This runs all steps and writes two files:
 
 | Flag | Default | Description |
 |---|---|---|
-| `--sample-fps` | `2.0` | Frames per second to sample. Lower = faster, higher = more accurate timing. |
-| `--det-conf` | `0.5` | Minimum detection confidence to accept a text region. |
-| `--ocr-conf` | `0.6` | Minimum OCR confidence to accept a recognised string. |
-| `--track-dist` | `60` | Max pixel distance between frames to link two detections as the same text. |
-| `--min-detections` | `2` | A text region must appear in at least this many frames to be included. |
-| `--ocr-output` | `ocr_raw.json` | Path for the intermediate OCR file. |
-| `--output` | `translation_metadata.json` | Path for the final metadata file. |
+| `--sample-fps <n>` | `2` | Frames per second to sample. Lower = faster, higher = more accurate timing. |
+| `--ocr-conf <n>` | `0.3` | Minimum OCR confidence (0–1). |
+| `--track-dist <n>` | `60` | Max pixel distance between frames to link two detections as the same text. |
+| `--min-detections <n>` | `2` | A text region must appear in at least this many frames to be included. |
+| `--ocr-output <path>` | `ocr_raw.json` | Path for the intermediate OCR file. |
+| `--output <path>` | `translation_metadata.json` | Path for the final metadata file. |
 | `--skip-ocr` | off | Skip frame extraction and OCR; load an existing `ocr_raw.json` instead. |
+| `--api-key <key>` | `` | [MyMemory](https://mymemory.translated.net/) API key for 10 000 words/day (vs 1 000 anonymous). |
 
 ### Examples
 
-Process at higher quality (4 fps, stricter confidence):
+Process at higher quality (4 fps):
 ```bash
-python preprocess.py anime.mp4 --sample-fps 4 --det-conf 0.6 --ocr-conf 0.7
+node preprocess.js anime.mp4 --sample-fps 4
 ```
 
 Re-run only tracking and translation (OCR already done):
 ```bash
-python preprocess.py anime.mp4 --skip-ocr --ocr-output ocr_raw.json
+node preprocess.js anime.mp4 --skip-ocr --ocr-output ocr_raw.json
 ```
+
+### Web UI
+
+```bash
+node server.js
+```
+
+Open **http://localhost:3000**, upload a video, watch real-time progress, then switch to the Player tab.  
+Options: `--host 0.0.0.0 --port 3000`
 
 ---
 
 ## Output format
 
-`translation_metadata.json` is an array of entries, one per stable text segment:
+`translation_metadata.json` is an array — one entry per stable text segment:
 
 ```json
 [
@@ -93,9 +103,8 @@ python preprocess.py anime.mp4 --skip-ocr --ocr-output ocr_raw.json
     "start_time": 4.17,
     "end_time": 8.33,
     "positions": [
-      { "t": 4.17, "x": 500, "y": 345 },
-      { "t": 6.25, "x": 560, "y": 345 },
-      { "t": 8.33, "x": 650, "y": 345 }
+      { "t": 4.17, "x": 500, "y": 355 },
+      { "t": 6.25, "x": 560, "y": 355 }
     ]
   }
 ]
@@ -106,66 +115,36 @@ python preprocess.py anime.mp4 --skip-ocr --ocr-output ocr_raw.json
 | `japanese` | Original text detected on screen |
 | `english` | Translated text |
 | `start_time` / `end_time` | Seconds when the text is visible |
-| `positions` | Per-frame display coordinates (pixels). The playback layer interpolates between these to follow a panning or zooming camera. `x`, `y` is where to render the translation — 10 px below the bottom of the source bounding box. |
-
-Dynamic text (e.g. a scoreboard changing from "100" to "110") produces separate entries, one per stable value.
+| `positions` | Per-keyframe display coordinates. `x, y` is 10 px below the bottom of the source bounding box. The player interpolates between keyframes to follow a panning camera. |
 
 ---
 
 ## Playback
 
-Open `player/index.html` directly in any modern browser — no server needed.
-
-```
-player/index.html
-```
-
-### Steps
+Open `player/index.html` directly in any modern browser (offline), or via `node server.js`.
 
 1. Click **Load Video** and pick your video file.
-2. Click **Load Metadata** and pick the `translation_metadata.json` produced by `preprocess.py`.
-3. Press play. Translations appear below each Japanese text region, following the camera if it pans.
+2. Click **Load Metadata** and pick `translation_metadata.json`.
+3. Press play — translations appear below each Japanese text region.
 
-### Keyboard shortcuts
-
-| Key | Action |
-|---|---|
-| `Space` | Play / pause |
-| `→` | Seek forward 5 s |
-| `←` | Seek backward 5 s |
-
-### How the overlay works
-
-```
-video.currentTime = 5.0 s
-        │
-        ▼
-filter metadata where start_time ≤ 5.0 ≤ end_time
-        │
-        ├── for each active entry
-        │     interpolate (x, y) from its keyframes   ← handles moving camera
-        │     draw label on <canvas> overlay
-        ▼
-requestAnimationFrame → repeat
-```
-
-The canvas is kept pixel-perfect to the video element via a `ResizeObserver`, so overlays scale correctly when the window is resized or the browser zooms.
+**Keyboard shortcuts:** `Space` play/pause · `→` +5 s · `←` −5 s
 
 ---
 
 ## Project structure
 
 ```
-preprocess.py          # CLI entry point — runs the full pipeline
-requirements.txt       # Python dependencies
+preprocess.js          # CLI entry point
+server.js              # Express web server + worker-thread pipeline runner
 src/
-  frame_extractor.py   # Sample frames from a video at a given FPS
-  text_detector.py     # Detect text regions with PaddleOCR
-  ocr_processor.py     # Recognise text inside detected regions
-  tracker.py           # Track regions across frames; split on text change
-  translator.py        # Translate Japanese strings with MarianMT
+  frameExtractor.js    # Extract frames via ffmpeg
+  textDetector.js      # Tesseract.js OCR (Japanese)
+  tracker.js           # Centroid-based cross-frame tracker
+  translator.js        # MyMemory REST translation
+  pipeline.js          # Full pipeline function (used by both CLI and server)
+  pipelineWorker.js    # worker_threads entry point for the server
 player/
-  index.html           # Browser player UI
+  index.html           # Browser UI
   player.js            # Playback logic: metadata lookup, interpolation, drawing
-  style.css            # Dark-theme styles
+  style.css            # Styles
 ```

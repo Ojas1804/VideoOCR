@@ -380,7 +380,7 @@ startBtn.addEventListener('click', async () => {
   if (!preprocessFile) return;
 
   if (location.protocol === 'file:') {
-    ppError.textContent = 'Run "python server.py" and open http://localhost:5000 to use preprocessing.';
+    ppError.textContent = 'Run "node server.js" and open http://localhost:3000 to use preprocessing.';
     ppError.classList.remove('hidden');
     return;
   }

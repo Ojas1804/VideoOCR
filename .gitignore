@@ -9,3 +9,7 @@ __pycache__
 *.sqlite3
 *.log
 *.avi
+
+# Node
+node_modules/
+package-lock.json
