@@ -1,6 +1,6 @@
 # VideoOCR
 
-Automatically detect Japanese text in a video, translate it to English, and produce a metadata file that tells a playback app exactly **when**, **where**, and **what** to display — similar to subtitles, but with on-screen coordinates so translations appear right below the original text.
+Automatically detect Japanese text in a video, translate it to English, and produce a metadata file that tells a playback app exactly **when**, **where**, and **what** to display — similar to subtitles, but with on-screen coordinates so translations appear right below the original text. Still trying to improve, much better with stable Japanese text.
 
 **Stack:** Node.js · Tesseract.js · fluent-ffmpeg · Express
 
